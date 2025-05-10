@@ -36,8 +36,8 @@ export default async function handler(req, res) {
     markdown += `🏈 ${nameA} vs ${nameB}\n🔢 ${a.points.toFixed(1)} – ${b.points.toFixed(1)}\n\n`;
   });
 
-  res.setHeader("Content-Type", "text/plain");
-  res.status(200).send(markdown);
+  res.setHeader("Content-Type", "application/json");
+  res.status(200).json({ markdown });
 
   function getCurrentNFLWeek() {
     const nflStart = new Date("2024-09-05T00:00:00Z");
