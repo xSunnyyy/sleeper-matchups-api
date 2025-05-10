@@ -1,11 +1,11 @@
 export default async function handler(req, res) {
   const leagueId = "1104276981148995584";
-  const week = req.query.week || getCurrentNFLWeek();
+  const week = req.query.week || 1;
 
   const [matchupsRes, rostersRes, usersRes] = await Promise.all([
     fetch(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`),
     fetch(`https://api.sleeper.app/v1/league/${leagueId}/rosters`),
-    fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`)
+    fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`),
   ]);
 
   const matchups = await matchupsRes.json();
@@ -22,7 +22,6 @@ export default async function handler(req, res) {
 
   const grouped = {};
   for (const entry of matchups) {
-    if (!entry.matchup_id) continue;
     grouped[entry.matchup_id] = grouped[entry.matchup_id] || [];
     grouped[entry.matchup_id].push(entry);
   }
@@ -36,13 +35,6 @@ export default async function handler(req, res) {
     markdown += `🏈 ${nameA} vs ${nameB}\n🔢 ${a.points.toFixed(1)} – ${b.points.toFixed(1)}\n\n`;
   });
 
-  res.setHeader("Content-Type", "application/json");
-  res.status(200).json({ markdown });
-
-  function getCurrentNFLWeek() {
-    const nflStart = new Date("2024-09-05T00:00:00Z");
-    const today = new Date();
-    const diffDays = Math.floor((today - nflStart) / (1000 * 60 * 60 * 24));
-    return Math.max(Math.floor(diffDays / 7) + 1, 1);
-  }
+  res.setHeader("Content-Type", "text/plain");
+  res.status(200).send(markdown);
 }
