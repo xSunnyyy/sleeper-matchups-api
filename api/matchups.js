@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const leagueId = "1104276981148995584";
-  const week = req.query.week || getCurrentNFLWeek();
+  const week = parseInt(req.query.week) || getCurrentNFLWeek();
 
   const [matchupsRes, rostersRes, usersRes] = await Promise.all([
     fetch(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`),
@@ -43,6 +43,7 @@ export default async function handler(req, res) {
     const nflStart = new Date("2024-09-05T00:00:00Z");
     const today = new Date();
     const diffDays = Math.floor((today - nflStart) / (1000 * 60 * 60 * 24));
-    return Math.max(Math.floor(diffDays / 7) + 1, 1);
+    const week = Math.floor(diffDays / 7) + 1;
+    return Math.min(Math.max(week, 1), 18); // force range 1–18
   }
 }
