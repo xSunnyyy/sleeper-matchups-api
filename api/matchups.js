@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       if (!a || !b) return;
       const nameA = rosterMap[a.roster_id] || "Team A";
       const nameB = rosterMap[b.roster_id] || "Team B";
-      markdown += `🏈 ${nameA} vs ${nameB}\n🔢 ${a.points.toFixed(1)} – ${b.points.toFixed(1)}\n\n`;
+      markdown += `${nameA} vs ${nameB}\n ${a.points.toFixed(1)} – ${b.points.toFixed(1)}\n\n`;
     });
 
     res.setHeader("Content-Type", "application/json");
