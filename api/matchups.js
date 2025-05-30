@@ -16,13 +16,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const [matchupsRes, rostersRes, usersRes] = await Promise.all([
-      fetch(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`),
+    // Get current rosters and users once
+    const [rostersRes, usersRes] = await Promise.all([
       fetch(`https://api.sleeper.app/v1/league/${leagueId}/rosters`),
       fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`)
     ]);
-
-    const matchups = await matchupsRes.json();
     const rosters = await rostersRes.json();
     const users = await usersRes.json();
 
@@ -33,6 +31,44 @@ export default async function handler(req, res) {
         rosterMap[roster.roster_id] = user.display_name;
       }
     }
+
+    // Initialize win/loss records
+    const recordMap = {};
+    for (const roster of rosters) {
+      recordMap[roster.roster_id] = { wins: 0, losses: 0 };
+    }
+
+    // Calculate records from previous weeks
+    for (let w = 1; w < week; w++) {
+      const res = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${w}`);
+      const matchups = await res.json();
+
+      const grouped = {};
+      for (const entry of matchups) {
+        if (!entry.matchup_id) continue;
+        grouped[entry.matchup_id] = grouped[entry.matchup_id] || [];
+        grouped[entry.matchup_id].push(entry);
+      }
+
+      Object.values(grouped).forEach((entries) => {
+        if (entries.length < 2) return;
+        const [a, b] = entries;
+        const scoreA = a.points ?? 0;
+        const scoreB = b.points ?? 0;
+
+        if (scoreA > scoreB) {
+          recordMap[a.roster_id].wins += 1;
+          recordMap[b.roster_id].losses += 1;
+        } else if (scoreB > scoreA) {
+          recordMap[b.roster_id].wins += 1;
+          recordMap[a.roster_id].losses += 1;
+        }
+      });
+    }
+
+    // Fetch current week matchups
+    const matchupsRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`);
+    const matchups = await matchupsRes.json();
 
     const grouped = {};
     for (const entry of matchups) {
@@ -47,19 +83,23 @@ export default async function handler(req, res) {
       if (entries.length < 2) return;
       const [a, b] = entries;
 
-      const nameA = rosterMap[a.roster_id] || "Team A";
-      const nameB = rosterMap[b.roster_id] || "Team B";
+      const nameA = rosterMap[a.roster_id] || `Roster ${a.roster_id}`;
+      const nameB = rosterMap[b.roster_id] || `Roster ${b.roster_id}`;
+      const recordA = recordMap[a.roster_id] || { wins: 0, losses: 0 };
+      const recordB = recordMap[b.roster_id] || { wins: 0, losses: 0 };
       const scoreA = a.points?.toFixed(1) ?? "0.0";
       const scoreB = b.points?.toFixed(1) ?? "0.0";
 
-      let line = "";
+      const labelA = `${nameA} (${recordA.wins}-${recordA.losses})`;
+      const labelB = `${nameB} (${recordB.wins}-${recordB.losses})`;
 
+      let line = "";
       if (parseFloat(scoreA) > parseFloat(scoreB)) {
-        line += `**${nameA} ${scoreA}** vs ${nameB} ${scoreB}`;
+        line = `<span style="color:#42A5F5; font-weight:bold;">${labelA} ${scoreA}</span> vs ${labelB} ${scoreB}`;
       } else if (parseFloat(scoreB) > parseFloat(scoreA)) {
-        line += `${nameA} ${scoreA} vs **${nameB} ${scoreB}**`;
+        line = `${labelA} ${scoreA} vs <span style="color:#42A5F5; font-weight:bold;">${labelB} ${scoreB}</span>`;
       } else {
-        line += `${nameA} ${scoreA} vs ${nameB} ${scoreB}`;
+        line = `${labelA} ${scoreA} vs ${labelB} ${scoreB}`;
       }
 
       markdown += `${line}\n\n`;
