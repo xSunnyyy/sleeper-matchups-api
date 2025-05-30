@@ -41,7 +41,7 @@ let markdown = `## Week ${week} Matchups\n\n`;export default async function hand
       grouped[entry.matchup_id].push(entry);
     }
 
-//    let markdown = `## Week ${week} Matchups\n\n`;
+    let markdown = `## Week ${week} Matchups\n\n`;
 
     Object.values(grouped).forEach((entries) => {
       if (entries.length < 2) return;
