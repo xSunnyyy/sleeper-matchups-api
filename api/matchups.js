@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       grouped[entry.matchup_id].push(entry);
     }
 
-    let markdown = `## Week ${week} Matchups\n\n`;
+    let markdown = "";
 
     Object.values(grouped).forEach((entries) => {
       if (entries.length < 2) return;
