@@ -77,7 +77,7 @@ export default async function handler(req, res) {
       grouped[entry.matchup_id].push(entry);
     }
 
-    let markdown = "";
+    let markdown = `## Week ${week} Matchups\n\n`;
 
     Object.values(grouped).forEach((entries) => {
       if (entries.length < 2) return;
@@ -95,9 +95,9 @@ export default async function handler(req, res) {
 
       let line = "";
       if (parseFloat(scoreA) > parseFloat(scoreB)) {
-        line = `<span style="color:#42A5F5; font-weight:bold;">${labelA} ${scoreA}</span> vs ${labelB} ${scoreB}`;
+        line = `**${labelA} ${scoreA}** vs ${labelB} ${scoreB}`;
       } else if (parseFloat(scoreB) > parseFloat(scoreA)) {
-        line = `${labelA} ${scoreA} vs <span style="color:#42A5F5; font-weight:bold;">${labelB} ${scoreB}</span>`;
+        line = `${labelA} ${scoreA} vs **${labelB} ${scoreB}**`;
       } else {
         line = `${labelA} ${scoreA} vs ${labelB} ${scoreB}`;
       }
