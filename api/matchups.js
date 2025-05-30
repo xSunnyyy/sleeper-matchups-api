@@ -1,4 +1,4 @@
-let markdown = `## Week ${week} Matchups\n\n`;export default async function handler(req, res) {
+export default async function handler(req, res) {
   const leagueParam = (req.query.league || "").toLowerCase();
   const week = parseInt(req.query.week) || getCurrentNFLWeek();
 
