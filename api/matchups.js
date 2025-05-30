@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+let markdown = `## Week ${week} Matchups\n\n`;export default async function handler(req, res) {
   const leagueParam = (req.query.league || "").toLowerCase();
   const week = parseInt(req.query.week) || getCurrentNFLWeek();
 
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       grouped[entry.matchup_id].push(entry);
     }
 
-    let markdown = `## Week ${week} Matchups\n\n`;
+//    let markdown = `## Week ${week} Matchups\n\n`;
 
     Object.values(grouped).forEach((entries) => {
       if (entries.length < 2) return;
