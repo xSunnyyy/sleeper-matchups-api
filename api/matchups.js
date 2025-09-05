@@ -3,8 +3,8 @@ export default async function handler(req, res) {
   const week = parseInt(req.query.week) || getCurrentNFLWeek();
 
   const leagueIds = {
-    "veto_city": "1104276981148995584",
-    "fight_club": "1121929315211468800",
+    "veto_city": "1245800211851255808",
+    "fight_club": "1250331243594125312",
     "dynasty_gurus": "1214712822336868352",
     "mod_and_friends": "1180912660638216192"
   };
